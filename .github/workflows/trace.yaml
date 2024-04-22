@@ -27,9 +27,9 @@ jobs:
     - name: Run stress test with tracing
       run: |
         psrecord "\
-          stress --cpu 1 --vm 1 --vm-bytes 100m --timeout 5s & \
-          stress --cpu 2 --vm 1 --vm-bytes 200m --timeout 5s & \
-          stress --cpu 3 --vm 1 --vm-bytes 300m --timeout 5s & \
+          stress --cpu 1 --vm 1 --vm-bytes 100m --timeout 5s && \
+          stress --cpu 2 --vm 1 --vm-bytes 200m --timeout 5s && \
+          stress --cpu 3 --vm 1 --vm-bytes 300m --timeout 5s && \
           stress --cpu 4 --vm 1 --vm-bytes 400m --timeout 5s \
         " --interval 1 --plot plot.png --include-children
 
