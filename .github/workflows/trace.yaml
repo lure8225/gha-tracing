@@ -1,0 +1,40 @@
+name: Trace with psrecord
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.10
+
+    - name: Install dependencies via apt
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y stress
+
+    - name: Install dependencies via pip
+      run: |
+        python -m pip install --upgrade pip
+        pip install psrecord
+
+    - name: Run stress test with tracing
+      run: |
+        psrecord $(\
+          stress --cpu 1 --vm 1 --vm-bytes 100m --timeout 5s & \
+          stress --cpu 2 --vm 1 --vm-bytes 200m --timeout 5s & \
+          stress --cpu 3 --vm 1 --vm-bytes 300m --timeout 5s & \
+          stress --cpu 4 --vm 1 --vm-bytes 400m --timeout 5s) \
+        --interval 1 --plot plot.png
+
+    - name: Upload plot
+      uses: actions/upload-artifact@v4
+      with:
+        name: Resource usage plot
+        path: plot.png
