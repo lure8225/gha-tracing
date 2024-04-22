@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies via pip
       run: |
         python -m pip install --upgrade pip
-        pip install psrecord
+        pip install psrecord matplotlib
 
     - name: Run stress test with tracing
       run: |
