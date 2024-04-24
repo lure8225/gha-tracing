@@ -1,0 +1,42 @@
+name: Trace with sar tool
+
+on: 
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install dependencies via apt
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y stress sysstat
+
+    - name: Start sar to collect system activity data
+      run: |
+        sudo nohup sar -o /tmp/sar.out 1 >/dev/null 2>&1 &
+        echo $! > sar_pid.txt
+
+    - name: Run stress test
+      run: |
+        stress --cpu 1 --vm 1 --vm-bytes 100m --timeout 5s
+        stress --cpu 2 --vm 1 --vm-bytes 200m --timeout 5s
+        stress --cpu 3 --vm 1 --vm-bytes 300m --timeout 5s
+        stress --cpu 4 --vm 1 --vm-bytes 400m --timeout 5s
+
+    - name: Stop sar and process data
+      run: |
+        sudo kill $(cat sar_pid.txt)
+        sar -u -f /tmp/sar.out > cpu_usage.txt
+        sar -r -f /tmp/sar.out > memory_usage.txt
+        sar -n DEV -f /tmp/sar.out > network_usage.txt
+        sar -b -f /tmp/sar.out > block_device_usage.txt
+        sar -A -f /tmp/sar.out > all_usage.txt
+
+    - name: Upload plot
+      uses: actions/upload-artifact@v4
+      with:
+        name: SAR data
+        path: all_usage.txt
